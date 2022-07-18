@@ -8,25 +8,26 @@ var convert = () => {
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
-    //html2pdf().set(opt).from(element).save();
+    // html2pdf().set(opt).from(element).save();
 
-    html2pdf().set(opt).from(element).toPdf().output('datauristring')
-    .then(function(pdfBase64) {
+    html2pdf().set(opt).from(element).toPdf().output('blob')
+    .then((pdf) => {
         const file = new File(
-            [pdfBase64],
+            [pdf],
             opt.filename,
-            // {type: 'application/pdf'}
+            {type: 'application/pdf'}
         ); 
 
         const formData = new FormData();        
         formData.append("KP.pdf", file);
 
+        
         fetch('http://localhost:3000/profile', {
           method: 'POST',
           body: formData,
         })
         .then(result => {
-          console.log('Success:', result);
+          console.log('Success:', result.status);
         })
         .catch(error => {
           console.error('Error:', error);
