@@ -1,7 +1,11 @@
+require('dotenv').config({ path: '.env' });
+
 const express = require('express'),
     multer = require('multer'),
-    app = express(),
-    port = 3000,
+    nodemailer = require('nodemailer');
+
+const app = express(),
+    port = process.env.PORT || 3000,
     server_message = `HTTP server is worked on port ${port}`;
 
 const storage = multer.diskStorage(
@@ -12,7 +16,7 @@ const storage = multer.diskStorage(
         }
     }
 ),
-    upload = multer({storage});
+    upload = multer({ storage });
 
 app.set('view engine', 'html');
 app.use(express.static(__dirname + '/public/'));
@@ -22,11 +26,77 @@ app.get('/status', (req, res) => {
 })
 
 app.post('/profile', upload.single('KP.pdf'), (req, res) => {
-    const file = req.file;
+    // const file = req.file;
 
-    console.log(file)
+    // console.log(file)
 
-    res.send('OK');
+    // res.send('OK');
+    let transporter = nodemailer.createTransport({
+        host: 'smtp.webio.pl',
+        port: 587,
+        secure: false,
+        auth: {
+            user: 'service@topconservice.pl',
+            pass: process.env.PASS
+        },
+    });
+
+    let message = {
+        from: '"Topcon Service" <service@topconservice.pl>',
+        to: 'g.gajda1976@gmail.com',
+        subject: `KP nr: 3`,
+        text: "Ustaw klienta poczty do odczytu wiadomości w fromacie HTML aby otrzymać potwiedzenie zgłosznia serwisowego!",
+        html: "<h2>Test OK</h>",
+        attachments: [
+            {
+                filename: 'KP.pdf',
+                path: './uploads/KP.pdf' 
+            }
+        ]
+    };
+
+    transporter.sendMail(message, (err, info) => {
+        res.send(info.response);
+        if (err) {
+            console.log(err.message);
+            res.send(err.message)
+        }
+    })    
+})
+
+app.get('/mail', (req, res) => {
+
+    let transporter = nodemailer.createTransport({
+        host: 'smtp.webio.pl',
+        port: 587,
+        secure: false,
+        auth: {
+            user: 'service@topconservice.pl',
+            pass: process.env.PASS
+        },
+    });
+
+    let message = {
+        from: '"Topcon Service" <service@topconservice.pl>',
+        to: 'g.gajda1976@gmail.com',
+        subject: `KP nr: 2`,
+        text: "Ustaw klienta poczty do odczytu wiadomości w fromacie HTML aby otrzymać potwiedzenie zgłosznia serwisowego!",
+        html: "<h2>Test OK</h>",
+        attachments: [
+            {
+                filename: 'KP.pdf',
+                path: './uploads/KP.pdf' 
+            }
+        ]
+    };
+
+    transporter.sendMail(message, (err, info) => {
+        res.send(info.response);
+        if (err) {
+            console.log(err.message);
+            res.send(err.message)
+        }
+    })
 })
 
 app.listen(port, () => {
