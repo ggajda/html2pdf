@@ -18,6 +18,13 @@ const storage = multer.diskStorage(
 ),
     upload = multer({ storage });
 
+// CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    next()
+});
+
 app.set('view engine', 'html');
 app.use(express.static(__dirname + '/public/'));
 
